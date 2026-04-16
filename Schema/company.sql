@@ -9,11 +9,11 @@ CREATE TABLE IF NOT EXISTS company_list (
      company_link VARCHAR(255) NULL,
      company_text VARCHAR(255) NULL,
      company VARCHAR(255) NULL,
-     listed_share BIGINT NULL,
-     paid_up_rs BIGINT NULL,
-     total_paid_up_capital_rs BIGINT NULL,
-     market_capitalization_rs BIGINT NULL,
+     listed_share DECIMAL NULL,
+     paid_up_rs DECIMAL NULL,
+     total_paid_up_capital_rs DECIMAL NULL,
+     market_capitalization_rs DECIMAL NULL,
      date_of_operation DATE NULL,
-     ltp BIGINT NULL,
+     ltp DECIMAL NULL,
      as_of DATE NULL
 );

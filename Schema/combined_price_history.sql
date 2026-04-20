@@ -6,11 +6,11 @@ CREATE TABLE IF NOT EXISTS combined_price_history (
      symbol_link VARCHAR(255) NULL,
      serial_number VARCHAR(255) NULL,
      date_added DATE NULL,
-     unlocked DECIMAL NULL,
-     high DECIMAL NULL,
-     low DECIMAL NULL,
-     ltp DECIMAL NULL,
-     percent_change INT NULL,
-     qty INT NULL,
-     turnover INT NULL
+     unlocked FLOAT(53) NULL,
+     high FLOAT(53) NULL,
+     low FLOAT(53) NULL,
+     ltp FLOAT(53) NULL,
+     percent_change FLOAT(53) NULL,
+     qty FLOAT(53) NULL,
+     turnover FLOAT(53) NULL
 )

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -8,7 +8,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Chart, LineSeries } from "lightweight-charts-react-components";
 import '../static/dashboard.css';
+
 
 export interface PaginationResult<T> {
     totalPages: number;
@@ -23,7 +25,7 @@ export interface StockData {
 
 
 export interface TimeFrameData {
-    date: string;
+    dateAdded: string;
     high: number;
     low: number;
     ltp: number;
@@ -37,6 +39,24 @@ export interface TimeFrameData {
 
 export type StockPaginationResult = PaginationResult<StockData>;
 
+export interface DashboardProps {
+    nameSearch: string;
+    companyNames: StockData[];
+    selectedCompanyName: string | null;
+    dateFrom: string | null;
+    dateTo: string | null;
+    company: TimeFrameData[];
+    plotOn: string;
+    plotVariables: PlotVariables[];
+    chartTitle: string;
+}
+
+
+export interface PlotVariables {
+    time: string;
+    value: number;
+}
+
 export default class Dashboard extends Component {
 
     constructor(props: any) {
@@ -44,13 +64,18 @@ export default class Dashboard extends Component {
     }
 
     private timer: any = null;
+    chartContainerRef = createRef<HTMLDivElement>();
 
-    state: { nameSearch: string, companyNames: StockData[], selectedCompanyName: string | null, dateFrom: string | null, dateTo: string | null } = {
+    state: DashboardProps = {
         nameSearch: '',
         companyNames: [],
-        selectedCompanyName: null,
+        selectedCompanyName: 'Nabil Bank Limited',
         dateFrom: null,
-        dateTo: null
+        dateTo: null,
+        company: [],
+        plotOn: 'ltp',
+        plotVariables: [],
+        chartTitle: ''
     };
 
     fetchCompanyNames = (name: string) => {
@@ -72,7 +97,7 @@ export default class Dashboard extends Component {
 
 
     componentDidMount() {
-
+        // this.searchCompany();
     };
 
 
@@ -110,10 +135,48 @@ export default class Dashboard extends Component {
         });
     }
 
-    searchCompany = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        e.currentTarget.reset();
-        
+
+    plotChart = (data: TimeFrameData[], plotOn: string) => {
+        const plotVariables: PlotVariables[] = [];
+        let chartTitle: string = '';
+        data.forEach((item: TimeFrameData) => {
+            chartTitle = item.companyName;
+            plotVariables.push({
+                time: item.dateAdded,
+                value: plotOn === 'ltp' ? item.ltp : plotOn === 'high' ? item.high : item.low
+            })
+        });
+        this.setState({ plotVariables: plotVariables, chartTitle: chartTitle });
+    }
+
+    searchCompany = () => {
+
+        var url: string = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}`;
+        if (this.state.dateFrom == null && this.state.dateTo == null) {
+            url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}`;
+        } else if (this.state.dateFrom == null && this.state.dateTo != null) {
+            url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}&to=${this.state.dateTo}`;
+        } else if (this.state.dateFrom != null && this.state.dateTo == null) {
+            url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}&from=${this.state.dateFrom}`;
+        }
+
+
+        fetch(url,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+
+            }
+        ).then(response => response.json())
+            .then(data => {
+                this.setState({ company: data });
+                this.plotChart(data, this.state.plotOn);
+            })
+            .catch(error => {
+                console.error('Error searching company:', error);
+            });
     }
 
 
@@ -148,7 +211,7 @@ export default class Dashboard extends Component {
                     <br />
                     <div className="dashboard-content-nav">
                         <div className="position-relative" style={{ width: '300px' }}>
-                            <form onSubmit={this.searchCompany} className="d-flex" role="search" id="searchForm">
+                            <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => {e.preventDefault(); this.searchCompany();}} className="d-flex" role="search" id="searchForm">
                                 <input
                                     className="form-control me-2"
                                     type="search"
@@ -156,6 +219,7 @@ export default class Dashboard extends Component {
                                     aria-label="Search"
                                     autoComplete="off"
                                     id="companyNameInput"
+                                    required
                                     onChange={this.companyNameSuggestionChange}
                                 />
                                 <button className="btn btn-primary" type="submit">
@@ -221,6 +285,19 @@ export default class Dashboard extends Component {
                         </div>
                     </div>
 
+                    <hr style={{ visibility: 'hidden' }} />
+                    <div className="chart-container">
+                        {this.state.plotVariables.length > 0 && (
+                            <>
+                                <h6>
+                                 {this.state.chartTitle}
+                                </h6>
+                                <Chart options={{ width: 800, height: 400 }}>
+                                    <LineSeries data={this.state.plotVariables} />
+                                </Chart>
+                            </>
+                        )}
+                    </div>
                 </div>
             </React.Fragment>
         )

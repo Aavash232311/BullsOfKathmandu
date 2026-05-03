@@ -103,7 +103,13 @@ namespace Data_API.Server.Controller
                 o.DateAdded
 
             }).ToListAsync();
-            return Ok(result);
+
+            var cleaned = result
+                .DistinctBy(x => x.DateAdded)  // if dublicate date then the library in client side will yell at us.
+                .OrderBy(x => x.DateAdded) // accending order.
+                .ToList();
+
+            return Ok(cleaned);
         }
     }
 }

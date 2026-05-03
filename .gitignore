@@ -1,3 +1,20 @@
 Data/
 .idea/
 .env
+
+# --- Python / Data Science ---
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+*.csv
+*.log
+# (Keep your raw data out of Git if the files are huge)
+
+# --- .NET / Visual Studio ---
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.sln.dotsettings.user
+FileContentIndex/

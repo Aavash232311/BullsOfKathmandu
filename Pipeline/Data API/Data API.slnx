@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Data API.AppHost/Data API.AppHost.csproj" />
+  <Project Path="Data API.Server/Data API.Server.csproj" />
+  <Project Path="frontend/frontend.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+</Solution>

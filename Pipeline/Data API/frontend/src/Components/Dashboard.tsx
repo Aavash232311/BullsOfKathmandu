@@ -5,6 +5,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import '../static/dashboard.css';
 
 export interface PaginationResult<T> {
@@ -18,6 +21,20 @@ export interface StockData {
     companyName: string;
 }
 
+
+export interface TimeFrameData {
+    date: string;
+    high: number;
+    low: number;
+    ltp: number;
+    companyName: string;
+    qty: number;
+    turnover: number;
+    id: string;
+    percentageChange: number;
+}
+
+
 export type StockPaginationResult = PaginationResult<StockData>;
 
 export default class Dashboard extends Component {
@@ -28,9 +45,12 @@ export default class Dashboard extends Component {
 
     private timer: any = null;
 
-    state: { nameSearch: string, companyNames: StockData[] } = {
+    state: { nameSearch: string, companyNames: StockData[], selectedCompanyName: string | null, dateFrom: string | null, dateTo: string | null } = {
         nameSearch: '',
         companyNames: [],
+        selectedCompanyName: null,
+        dateFrom: null,
+        dateTo: null
     };
 
     fetchCompanyNames = (name: string) => {
@@ -59,7 +79,7 @@ export default class Dashboard extends Component {
     companyNameSuggestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         const value: string = e.currentTarget.value;
-        
+
         if (value === '') {
             // if the value is empty, we will not search and clear the company names.
             this.setState({ companyNames: [] });
@@ -79,6 +99,21 @@ export default class Dashboard extends Component {
             }, 300);
 
         });
+    }
+
+
+    selectedCompany = (companyName: string) => {
+        this.setState({ selectedCompanyName: companyName, companyNames: [] }, () => {
+            // not recomended I am out of time, I know there is a better way.
+            const form: any = document.getElementById('companyNameInput'); // slap in ANY not a good idea but I am out of time.
+            form.value = companyName;
+        });
+    }
+
+    searchCompany = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        e.currentTarget.reset();
+        
     }
 
 
@@ -113,15 +148,17 @@ export default class Dashboard extends Component {
                     <br />
                     <div className="dashboard-content-nav">
                         <div className="position-relative" style={{ width: '300px' }}>
-                            <form className="d-flex" role="search">
+                            <form onSubmit={this.searchCompany} className="d-flex" role="search" id="searchForm">
                                 <input
                                     className="form-control me-2"
                                     type="search"
                                     placeholder="Search"
                                     aria-label="Search"
+                                    autoComplete="off"
+                                    id="companyNameInput"
                                     onChange={this.companyNameSuggestionChange}
                                 />
-                                <button className="btn btn-outline-success" type="submit">
+                                <button className="btn btn-primary" type="submit">
                                     Search
                                 </button>
                             </form>
@@ -134,15 +171,53 @@ export default class Dashboard extends Component {
                                             key={item.id || index}
                                             className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                                             style={{ cursor: 'pointer' }}
+                                            onClick={() => this.selectedCompany(item.companyName)}
                                         >
                                             <div>
                                                 <strong>{item.companyName}</strong>
-                                    
+
                                             </div>
                                         </li>
                                     ))}
                                 </ul>
                             )}
+                        </div>
+                        <div>
+                            <div className="date-range-picker">
+                                <div>
+                                    <div>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DatePicker label="From Date" slotProps={{
+                                                textField: {
+                                                    size: 'small'
+                                                }
+                                            }}
+                                                sx={{ backgroundColor: 'white', color: 'white', borderRadius: '4px' }}
+                                                onChange={(date) => {
+                                                    this.setState({ dateFrom: date });
+                                                }}
+                                            />
+                                        </LocalizationProvider>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div>
+                                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                            <DatePicker label="To Date"
+                                                slotProps={{
+                                                    textField: {
+                                                        size: 'small'
+                                                    }
+                                                }}
+                                                onChange={(date) => {
+                                                    this.setState({ dateTo: date });
+                                                }}
+                                                sx={{ backgroundColor: 'white', color: 'white', borderRadius: '4px' }}
+                                            />
+                                        </LocalizationProvider>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

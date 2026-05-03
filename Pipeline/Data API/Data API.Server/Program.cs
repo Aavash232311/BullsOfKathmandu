@@ -55,7 +55,7 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddFixedWindowLimiter(policyName: "SearchOptionsRateLimiting", opt =>
     {
-        opt.PermitLimit = 100000;
+        opt.PermitLimit = 5000; // there is a buffer in the client side as well, so we don't need to worry much.
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 2; // queue line

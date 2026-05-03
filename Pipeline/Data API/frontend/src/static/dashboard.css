@@ -4,8 +4,8 @@
 
 .dashboard-content-nav {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 15px;
+    grid-template-columns: repeat(3, 350px);
+    grid-gap: 10px;
 }
 
 .name-suggestion-list {
@@ -14,3 +14,10 @@
     overflow-y: auto;
     margin-top: 10px;
 }
+
+.date-range-picker {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+}
+

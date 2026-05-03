@@ -1,5 +1,6 @@
 ﻿using Data_API.Server.Data;
 using Data_API.Server.Services;
+using Data_API.Server.TempModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -64,5 +65,45 @@ namespace Data_API.Server.Controller
         // and we will see if we can do some createive analyis.
         // I don't want to spend time on React for SQL course. 
         // EF -> SQL equivalent is relivent demostrates real life procress.
+
+        [Route("company_price_history")]
+        [HttpGet]
+        [EnableRateLimiting("RateLimitingPolicy")]
+        public async Task<IActionResult> GetCompanyById(string comapnyName, DateOnly? from, DateOnly? to)
+        {
+            // we get the company name, and all the object from database and plot the chart based on the range
+            IQueryable<CombinedPriceHistory> getCompany = _context.CombinedPriceHistories;
+            if (from is null && to is null)
+            {
+                getCompany = getCompany.Where(x => x.CompanyName == comapnyName); 
+            }
+
+            if (from is null && to is not null)
+            {
+                getCompany = getCompany.Where(x => x.CompanyName == comapnyName);
+            }
+            if (from is not null && to is null)
+            {
+                getCompany = getCompany.Where(x => x.CompanyName == comapnyName && x.DateAdded >= from);
+            }
+            if (from is not null && to is not null)
+            {
+                getCompany = getCompany.Where(x => x.CompanyName == comapnyName && x.DateAdded >= from && x.DateAdded <= to);
+            }
+            var result = await getCompany.Select(o => new 
+            {
+                o.Id,
+                o.High,
+                o.Low,
+                o.Ltp,
+                o.CompanyName,
+                o.Qty,
+                o.PercentChange,
+                o.Turnover,
+                o.DateAdded
+
+            }).ToListAsync();
+            return Ok(result);
+        }
     }
 }

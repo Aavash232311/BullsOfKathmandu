@@ -18,3 +18,7 @@ __pycache__/
 *.suo
 *.sln.dotsettings.user
 FileContentIndex/
+
+
+# no ef core migrations
+Pipeline/Data API/Data API.Server/Migrations/ 

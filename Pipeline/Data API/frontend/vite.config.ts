@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       // Proxy API calls to the app service
-      '/api': {
+      '/stock': {
         target: process.env.SERVER_HTTPS || process.env.SERVER_HTTP,
         changeOrigin: true
       }

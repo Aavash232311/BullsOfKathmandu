@@ -1,13 +1,17 @@
+import React, { Component } from 'react';
+import Dashboard from './Components/Dashboard.tsx';
 import './App.css'
 
 
 
-function App() {
-  return (
-    <div className="app-container">
-        Hello world
-    </div>
-  )
+export default class App extends Component {
+  render() {
+    return (
+      <React.Fragment>
+        <div className="app-container">
+          <Dashboard />
+        </div>
+      </React.Fragment>
+    )
+  }
 }
-
-export default App

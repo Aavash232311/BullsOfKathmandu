@@ -1,0 +1,9 @@
+.dashboard-content, .dashboard-content-nav  {
+    margin-left: 15px;
+}
+
+.dashboard-content-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 15px;
+}

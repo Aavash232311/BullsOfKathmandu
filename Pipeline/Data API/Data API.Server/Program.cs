@@ -1,4 +1,5 @@
 using Data_API.Server.Data;
+using Data_API.Server.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
@@ -19,6 +20,8 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
+
+builder.Services.AddSingleton<Helper>(); // helper class
 
 // Rate Limiting policy
 builder.Services.AddRateLimiter(options =>

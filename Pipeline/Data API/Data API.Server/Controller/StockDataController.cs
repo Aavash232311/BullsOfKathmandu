@@ -73,6 +73,8 @@ namespace Data_API.Server.Controller
         {
             // we get the company name, and all the object from database and plot the chart based on the range
             IQueryable<CombinedPriceHistory> getCompany = _context.CombinedPriceHistories;
+            if (from is not null && to is not null && from > to)
+                (from, to) = (to, from); // just swap them
             if (from is null && to is null)
             {
                 getCompany = getCompany.Where(x => x.CompanyName == comapnyName); 

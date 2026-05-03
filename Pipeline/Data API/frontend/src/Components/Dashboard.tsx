@@ -69,7 +69,7 @@ export default class Dashboard extends Component {
     state: DashboardProps = {
         nameSearch: '',
         companyNames: [],
-        selectedCompanyName: 'Nabil Bank Limited',
+        selectedCompanyName: 'Citizens Bank International Limited',
         dateFrom: null,
         dateTo: null,
         company: [],
@@ -97,7 +97,7 @@ export default class Dashboard extends Component {
 
 
     componentDidMount() {
-        // this.searchCompany();
+        this.searchCompany();
     };
 
 
@@ -149,16 +149,17 @@ export default class Dashboard extends Component {
         this.setState({ plotVariables: plotVariables, chartTitle: chartTitle });
     }
 
-    searchCompany = () => {
+    formatDate = (date: string | null): string | null => {
+        if (!date) return null;
+        const parsed = new Date(date);
+        return parsed.toISOString().split("T")[0];
+    };
 
-        var url: string = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}`;
-        if (this.state.dateFrom == null && this.state.dateTo == null) {
-            url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}`;
-        } else if (this.state.dateFrom == null && this.state.dateTo != null) {
-            url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}&to=${this.state.dateTo}`;
-        } else if (this.state.dateFrom != null && this.state.dateTo == null) {
-            url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}&from=${this.state.dateFrom}`;
-        }
+    searchCompany = () => {
+        let url = `/stock/company_price_history?comapnyName=${this.state.selectedCompanyName}`;
+
+        if (this.state.dateFrom) url += `&from=${this.formatDate(this.state.dateFrom)}`;
+        if (this.state.dateTo) url += `&to=${this.formatDate(this.state.dateTo)}`;
 
 
         fetch(url,
@@ -211,7 +212,7 @@ export default class Dashboard extends Component {
                     <br />
                     <div className="dashboard-content-nav">
                         <div className="position-relative" style={{ width: '300px' }}>
-                            <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => {e.preventDefault(); this.searchCompany();}} className="d-flex" role="search" id="searchForm">
+                            <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); this.searchCompany(); }} className="d-flex" role="search" id="searchForm">
                                 <input
                                     className="form-control me-2"
                                     type="search"
@@ -290,7 +291,7 @@ export default class Dashboard extends Component {
                         {this.state.plotVariables.length > 0 && (
                             <>
                                 <h6>
-                                 {this.state.chartTitle}
+                                    {this.state.chartTitle}
                                 </h6>
                                 <Chart options={{ width: 800, height: 400 }}>
                                     <LineSeries data={this.state.plotVariables} />

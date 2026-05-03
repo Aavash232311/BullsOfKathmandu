@@ -15,7 +15,6 @@ namespace Data_API.Server.Controller
 {
     [Route("[controller]")]
     [ApiController]
-    [EnableRateLimiting("RateLimitingPolicy")] 
     public class StockController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -37,10 +36,15 @@ namespace Data_API.Server.Controller
         }
 
         // api to search company name.
-        [Route("company_name")]
+        [Route("company_name")] // rate limiting should be little low here, or we need to design this seperately in the client side. Problem of system design but not necessary in SQL project.
         [HttpGet]
+        [EnableRateLimiting("SearchOptionsRateLimiting")] // Good system design question, we can disucss some other sunny day.
         public async Task<IActionResult> GetCompanyName(string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                return new JsonResult(Ok(new List<object>())); // just don't stress the database.
+            }
             var getCompanyName = await _context.CombinedPriceHistories
                 .Where(x => x.CompanyName.Contains(name))
                 .GroupBy(c => c.CompanyName)

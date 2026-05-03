@@ -35,12 +35,33 @@ builder.Services.AddRateLimiter(options =>
 
     options.AddFixedWindowLimiter(policyName: "RateLimitingPolicy", opt =>
     {
-        opt.PermitLimit = 10;
+        opt.PermitLimit = 60;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 2; // queue line
     });
 });
+
+
+// Flexible rate limiting policy for the name search.
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.ContentType = "text/plain";
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsync("Many request please try again.", cancellationToken: token);
+    };
+
+    options.AddFixedWindowLimiter(policyName: "SearchOptionsRateLimiting", opt =>
+    {
+        opt.PermitLimit = 100000;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 2; // queue line
+    });
+});
+
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

@@ -7,3 +7,10 @@
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 15px;
 }
+
+.name-suggestion-list {
+    min-height: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}

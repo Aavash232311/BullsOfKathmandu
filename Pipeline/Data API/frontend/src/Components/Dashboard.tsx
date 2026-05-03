@@ -26,15 +26,16 @@ export default class Dashboard extends Component {
         super(props);
     }
 
-    state: { currentSearchNamePage: number, nameSearch: string, companyNames: StockData[] } = {
-        currentSearchNamePage: 1,
-        nameSearch: 'Nepal Finance Limited',
+    private timer: any = null;
+
+    state: { nameSearch: string, companyNames: StockData[] } = {
+        nameSearch: '',
         companyNames: [],
-    }
+    };
 
-
-    componentDidMount() {
-        fetch(`/stock/company_name?name=${this.state.nameSearch}&page=${this.state.currentSearchNamePage}`, {
+    fetchCompanyNames = (name: string) => {
+        if (name === '') return;
+        fetch(`/stock/company_name?name=${name}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -42,15 +43,43 @@ export default class Dashboard extends Component {
         }).then(response => response.json())
             .then(data => {
                 var res: StockPaginationResult = data;
-                this.setState({ companyNames: res.data });
+                this.setState({ companyNames: res });
             })
             .catch(error => {
                 console.error('Error fetching company names:', error);
             });
     }
-    
 
-    
+
+    componentDidMount() {
+
+    };
+
+
+    companyNameSuggestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+        const value: string = e.currentTarget.value;
+        
+        if (value === '') {
+            // if the value is empty, we will not search and clear the company names.
+            this.setState({ companyNames: [] });
+            return;
+        }
+
+        if (this.timer) clearTimeout(this.timer); // it's like waiting till the user stops tpying.
+
+        if (value.length < 3) {
+            this.setState({ results: [] });
+            return;
+        }
+        this.setState({ nameSearch: value }, () => {
+            // after setting the name, the state will be loaded and our search will be triggred.
+            this.timer = setTimeout(() => {
+                this.fetchCompanyNames(this.state.nameSearch);
+            }, 300);
+
+        });
+    }
 
 
     render() {
@@ -83,18 +112,37 @@ export default class Dashboard extends Component {
 
                     <br />
                     <div className="dashboard-content-nav">
-                        <div>
+                        <div className="position-relative" style={{ width: '300px' }}>
                             <form className="d-flex" role="search">
                                 <input
                                     className="form-control me-2"
                                     type="search"
                                     placeholder="Search"
                                     aria-label="Search"
+                                    onChange={this.companyNameSuggestionChange}
                                 />
                                 <button className="btn btn-outline-success" type="submit">
                                     Search
                                 </button>
                             </form>
+                            {this.state.companyNames.length > 0 && (
+                                <ul className="list-group position-absolute w-100 shadow-sm name-suggestion-list"
+                                    style={{ zIndex: 1000, top: '100%' }}>
+
+                                    {this.state.companyNames.map((item: StockData, index: number) => (
+                                        <li
+                                            key={item.id || index}
+                                            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <div>
+                                                <strong>{item.companyName}</strong>
+                                    
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
 

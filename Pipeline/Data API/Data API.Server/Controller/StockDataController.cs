@@ -77,7 +77,7 @@ namespace Data_API.Server.Controller
                 (from, to) = (to, from); // just swap them
             if (from is null && to is null)
             {
-                getCompany = getCompany.Where(x => x.CompanyName == comapnyName); 
+                getCompany = getCompany.Where(x => x.CompanyName == comapnyName);
             }
 
             if (from is null && to is not null)
@@ -92,7 +92,7 @@ namespace Data_API.Server.Controller
             {
                 getCompany = getCompany.Where(x => x.CompanyName == comapnyName && x.DateAdded >= from && x.DateAdded <= to);
             }
-            var result = await getCompany.Select(o => new 
+            var result = await getCompany.Select(o => new
             {
                 o.Id,
                 o.High,
@@ -112,6 +112,6 @@ namespace Data_API.Server.Controller
                 .ToList();
 
             return Ok(cleaned);
-        }
+        }  
     }
 }

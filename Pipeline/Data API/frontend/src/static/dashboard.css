@@ -1,10 +1,10 @@
-.dashboard-content, .dashboard-content-nav  {
+.dashboard-content, .dashboard-content-nav, .select-plot-on  {
     margin-left: 15px;
 }
 
 .dashboard-content-nav {
     display: grid;
-    grid-template-columns: repeat(3, 350px);
+    grid-template-columns: repeat(4, 350px);
     grid-gap: 10px;
 }
 

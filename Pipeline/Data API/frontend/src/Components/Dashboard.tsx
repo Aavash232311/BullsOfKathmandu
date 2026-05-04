@@ -9,6 +9,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Chart, LineSeries } from "lightweight-charts-react-components";
+
 import '../static/dashboard.css';
 
 
@@ -39,6 +40,8 @@ export interface TimeFrameData {
 
 export type StockPaginationResult = PaginationResult<StockData>;
 
+
+
 export interface DashboardProps {
     nameSearch: string;
     companyNames: StockData[];
@@ -46,8 +49,6 @@ export interface DashboardProps {
     dateFrom: string | null;
     dateTo: string | null;
     company: TimeFrameData[];
-    plotOn: string;
-    plotVariables: PlotVariables[];
     chartTitle: string;
 }
 
@@ -56,6 +57,8 @@ export interface PlotVariables {
     time: string;
     value: number;
 }
+
+
 
 export default class Dashboard extends Component {
 
@@ -73,8 +76,6 @@ export default class Dashboard extends Component {
         dateFrom: null,
         dateTo: null,
         company: [],
-        plotOn: 'ltp',
-        plotVariables: [],
         chartTitle: ''
     };
 
@@ -136,18 +137,6 @@ export default class Dashboard extends Component {
     }
 
 
-    plotChart = (data: TimeFrameData[], plotOn: string) => {
-        const plotVariables: PlotVariables[] = [];
-        let chartTitle: string = '';
-        data.forEach((item: TimeFrameData) => {
-            chartTitle = item.companyName;
-            plotVariables.push({
-                time: item.dateAdded,
-                value: plotOn === 'ltp' ? item.ltp : plotOn === 'high' ? item.high : item.low
-            })
-        });
-        this.setState({ plotVariables: plotVariables, chartTitle: chartTitle });
-    }
 
     formatDate = (date: string | null): string | null => {
         if (!date) return null;
@@ -172,16 +161,34 @@ export default class Dashboard extends Component {
             }
         ).then(response => response.json())
             .then(data => {
-                this.setState({ company: data });
-                this.plotChart(data, this.state.plotOn);
+                this.setState({ company: data, chartTitle: data[0].companyName });
             })
             .catch(error => {
                 console.error('Error searching company:', error);
             });
     }
 
+    SERIES_CONFIG = [
+        { key: "ltp", color: "#2196F3", title: "LTP" },
+        { key: "high", color: "#4CAF50", title: "High" },
+        { key: "low", color: "#F44336", title: "Low" },
+        { key: "percentageChange", color: "#00BCD4", title: "% Change" },
+    ];
+
+    TURNOVER_SERIES_CONFIG = [
+        { key: "turnover", color: "#9C27B0", title: "Turnover" },
+    ];
+
 
     render() {
+        const { company } = this.state;
+        const mapData = (key: keyof TimeFrameData) =>
+            company.map((item) => ({
+                time: item.dateAdded.split("T")[0],
+                value: item[key] as number,
+            }));
+
+
         return (
             <React.Fragment>
                 <div className="dashboard-container">
@@ -288,13 +295,47 @@ export default class Dashboard extends Component {
 
                     <hr style={{ visibility: 'hidden' }} />
                     <div className="chart-container">
-                        {this.state.plotVariables.length > 0 && (
+                        {this.state.company.length > 0 && (
                             <>
+                                <div>
+                                    <h6>
+                                        {this.state.chartTitle}
+                                    </h6> <br />
+                                    <Chart options={{ width: 800, height: 400 }}>
+                                        {this.SERIES_CONFIG.map((series) => {
+                                            return (
+                                                (
+                                                    <LineSeries
+                                                        key={series.key}
+                                                        data={mapData(series.key as keyof TimeFrameData)}
+                                                        options={{
+                                                            color: series.color,
+                                                            title: series.title,
+                                                        }}
+                                                    />
+                                                )
+                                            )
+                                        })}
+                                    </Chart>
+                                </div>
+
+                                <hr style={{ visibility: 'hidden' }} />
                                 <h6>
-                                    {this.state.chartTitle}
-                                </h6>
+                                   Turnover: {this.state.chartTitle}
+                                </h6> <br />
                                 <Chart options={{ width: 800, height: 400 }}>
-                                    <LineSeries data={this.state.plotVariables} />
+                                    {this.TURNOVER_SERIES_CONFIG.map((series) => {
+                                        return (
+                                            <LineSeries
+                                                key={series.key}
+                                                data={mapData(series.key as keyof TimeFrameData)}
+                                                options={{
+                                                    color: series.color,
+                                                    title: series.title,
+                                                }}
+                                            />
+                                        )
+                                    })}
                                 </Chart>
                             </>
                         )}

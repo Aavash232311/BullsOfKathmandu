@@ -47,7 +47,7 @@ namespace Data_API.Server.Controller
                 return new JsonResult(Ok(new List<object>())); // just don't stress the database.
             }
             var getCompanyName = await _context.CombinedPriceHistories
-                .Where(x => x.CompanyName.Contains(name))
+                .Where(x => x.CompanyName.ToLower().Contains(name.ToLower()))
                 .GroupBy(c => c.CompanyName)
                 .Select(s => new
                 {

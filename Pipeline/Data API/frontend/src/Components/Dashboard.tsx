@@ -103,7 +103,6 @@ export default class Dashboard extends Component {
 
 
     companyNameSuggestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-
         const value: string = e.currentTarget.value;
 
         if (value === '') {

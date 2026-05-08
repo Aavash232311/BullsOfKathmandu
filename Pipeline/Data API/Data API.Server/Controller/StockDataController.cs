@@ -112,6 +112,50 @@ namespace Data_API.Server.Controller
                 .ToList();
 
             return Ok(cleaned);
-        }  
+        }
+
+        [Route("sector")]
+        [HttpGet] // if someone is seeing like a tech-recruter, they might be wondering why write rate limiter here, declare global and only mention for expeption, that might work but for right now no time to test.
+        [EnableRateLimiting("SearchOptionsRateLimiting")] // this rate limitor is little lower because if someone overrides the client side then they can easily slow it down.
+        public async Task<IActionResult> SearchSector(string name)
+        {
+            var sector = await _context.CompanyLists.Where(
+                    x => x.Sector.ToLower().Contains(name.ToLower())
+                )
+                .GroupBy(s => s.Sector)
+                .Select(s => new
+                {
+                    Id = s.Select(x => x.Id).FirstOrDefault(), 
+                    name = s.Key
+                })
+                .Distinct()
+                .Take(10)
+                .ToListAsync();
+            return Ok(sector);
+        }
+
+        [Route("market-cap")]
+        [HttpGet]
+        [EnableRateLimiting("RateLimitingPolicy")]
+        public async Task<IActionResult> MarketCapData(string name)
+        {
+            var marketCapRes = await _context.CompanyLists
+                .Where(s => s.Sector != null && s.Sector.ToLower().Contains(name.ToLower()) && s.MarketCapitalizationRs != null) // even though that is almost perfect name according to clinet side logic, until and unless someone brute forces that one right there.
+                .Select(s => new
+                {
+                    as_of = s.AsOf,
+                    market_cap = s.MarketCapitalizationRs,
+                    ltp = s.Ltp,
+                    paid_up = s.PaidUpRs, // I am not a finance person
+                    sector = s.Sector,
+                    listed_share = s.ListedShare
+                })
+                .OrderBy(a => a.as_of)
+                .ToListAsync();
+            var cleaned = marketCapRes
+                .DistinctBy(x => x.as_of); // It's important to understand why this does not work in SQL level but I will do that after my finals are over.
+            
+            return Ok(cleaned);
+        }
     }
 }

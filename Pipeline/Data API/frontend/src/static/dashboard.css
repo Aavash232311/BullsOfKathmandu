@@ -1,5 +1,10 @@
-.dashboard-content, .dashboard-content-nav, .select-plot-on  {
+.dashboard-content,
+.dashboard-content-nav,
+.select-plot-on {
     margin-left: 15px;
+}
+.dashboard-container {
+    overflow: auto;
 }
 
 .dashboard-content-nav {
@@ -21,6 +26,26 @@
     grid-gap: 10px;
 }
 
-.chart-container {
+.chart-container, .chart-container-table {
     margin: 20px;
+}
+
+.chart-grids {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 5px;
+}
+
+
+.chart-container-table {
+    width: 500px;
+    border-radius: 10px;
+}
+
+@media screen and (max-width:1440px) {
+    .chart-grids {
+        display: block;
+        margin-bottom: 50px;
+    }
+
 }

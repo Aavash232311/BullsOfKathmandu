@@ -7,7 +7,6 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Chart, LineSeries } from "lightweight-charts-react-components";
 
 import '../static/dashboard.css';
@@ -96,7 +95,7 @@ export default class Dashboard extends Component {
         chartTitle: '',
         sectorSearch: '',
         sectorNames: [],
-        selectedSectorName: 'Government Bonds',
+        selectedSectorName: 'Hydropower',
         stockMarketCapOfSector: [],
     };
 
@@ -170,7 +169,6 @@ export default class Dashboard extends Component {
 
         if (this.state.dateFrom) url += `&from=${this.formatDate(this.state.dateFrom)}`;
         if (this.state.dateTo) url += `&to=${this.formatDate(this.state.dateTo)}`;
-
 
         fetch(url,
             {
@@ -278,8 +276,6 @@ export default class Dashboard extends Component {
                 time: item.dateAdded.split("T")[0],
                 value: item[key] as number,
             }));
-
-
         return (
             <React.Fragment>
                 <div className="dashboard-container">
@@ -304,7 +300,7 @@ export default class Dashboard extends Component {
 
                     <br />
                     <div className="dashboard-content">
-                        <h2>Stock Dashboard</h2>
+                        <h2>Stock Dashboard Demo <small>(For a SQL course project, very basic)</small></h2>
                     </div>
 
                     <br />
@@ -346,36 +342,38 @@ export default class Dashboard extends Component {
                             )}
                         </div>
                         <div>
-                            <div className="date-range-picker">
+                            <div className="date-range-picker" >
                                 <div>
-                                    <div>
+                                    <div className='d-flex align-items-center gap-2'>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker label="From Date" slotProps={{
-                                                textField: {
-                                                    size: 'small'
-                                                }
-                                            }}
-                                                sx={{ backgroundColor: 'white', color: 'white', borderRadius: '4px' }}
-                                                onChange={(date) => {
-                                                    this.setState({ dateFrom: date });
+                                            <label htmlFor="fromDate" className="form-label text-light  mb-0">
+                                                <small>From </small> 
+                                            </label>
+
+                                            <input
+                                                className="form-control bg-dark text-light border-secondary"
+                                                type="date"
+                                                id='fromDate'
+                                                onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                                                    this.setState({ dateFrom: ev.currentTarget.value });
                                                 }}
                                             />
                                         </LocalizationProvider>
                                     </div>
                                 </div>
                                 <div>
-                                    <div>
+                                    <div className='d-flex align-items-center gap-2'>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DatePicker label="To Date"
-                                                slotProps={{
-                                                    textField: {
-                                                        size: 'small'
-                                                    }
+                                            <label htmlFor="toDate" className="form-label text-light mb-0"  >
+                                                <small>To </small>
+                                            </label>
+                                            <input
+                                                className="form-control bg-dark text-light border-secondary"
+                                                type="date"
+                                                id='toDate'
+                                                onChange={(ev: React.ChangeEvent<HTMLInputElement>) => {
+                                                    this.setState({ dateTo: ev.currentTarget.value });
                                                 }}
-                                                onChange={(date) => {
-                                                    this.setState({ dateTo: date });
-                                                }}
-                                                sx={{ backgroundColor: 'white', color: 'white', borderRadius: '4px' }}
                                             />
                                         </LocalizationProvider>
                                     </div>
@@ -451,7 +449,7 @@ export default class Dashboard extends Component {
                                     placeholder='search sector' />
                                 <input type="submit" className='btn btn-primary' value="Search" />
                             </form>
-
+                            <hr style={{ visibility: "hidden" }} />
                             {this.state.sectorNames.length > 0 && (
                                 <ul className="list-group position-absolute w-100 shadow-sm name-suggestion-list"
                                     style={{ zIndex: 1000, top: '100%' }}>
@@ -478,7 +476,7 @@ export default class Dashboard extends Component {
                             <h6>
                                 Market Cap of {this.state.selectedSectorName} Sector
                             </h6>
-                            <table className="table" style={{ width: "100%" }}>
+                            <table className="table table-success table-striped" style={{ width: "100%" }}>
                                 <thead>
                                     <tr>
                                         <th scope="col">Market Cap</th>
@@ -492,14 +490,14 @@ export default class Dashboard extends Component {
                                     {this.state.stockMarketCapOfSector.map((data, index) => {
                                         return (
                                             <tr key={index}>
-                                                <td> 
+                                                <td>
                                                     {data.market_cap !== null ? (
                                                         <>
                                                             <b>Rs.</b> {data.market_cap}
                                                         </>
                                                     ) : 'N/A'}
                                                 </td>
-                                                <td> 
+                                                <td>
                                                     {data.ltp !== null ? (
                                                         <>
                                                             <b>Rs.</b> {data.ltp}

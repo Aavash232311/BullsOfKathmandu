@@ -53,6 +53,7 @@ export interface DashboardProps {
     sectorNames: SectorData[];
     selectedSectorName: string | null;
     stockMarketCapOfSector: SectorMarketCapData[];
+    groupedBySector: GroupedBySectorData[];
 }
 
 
@@ -73,6 +74,14 @@ export interface SectorMarketCapData {
     paid_up: number;
     sector: string;
     listed_share: string;
+}
+
+export interface GroupedBySectorData {
+    avgHigh: number;
+    avgLow: number;
+    avgLtp: number;
+    avgTurnOver: number;
+    label: string;
 }
 
 export default class Dashboard extends Component {
@@ -97,6 +106,7 @@ export default class Dashboard extends Component {
         sectorNames: [],
         selectedSectorName: 'Hydropower',
         stockMarketCapOfSector: [],
+        groupedBySector: [],
     };
 
     fetchCompanyNames = (name: string) => {
@@ -249,8 +259,8 @@ export default class Dashboard extends Component {
             }
         }).then(response => response.json())
             .then(data => {
-                const res: SectorMarketCapData[] = data;
-                this.setState({ stockMarketCapOfSector: res });
+                const res: SectorMarketCapData[] = data.marketCap;
+                this.setState({ stockMarketCapOfSector: res, groupedBySector: data.ltpBySector });
             })
             .catch(error => {
                 console.error('Error fetching sector market cap:', error);
@@ -347,7 +357,7 @@ export default class Dashboard extends Component {
                                     <div className='d-flex align-items-center gap-2'>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <label htmlFor="fromDate" className="form-label text-light  mb-0">
-                                                <small>From </small> 
+                                                <small>From </small>
                                             </label>
 
                                             <input
@@ -527,6 +537,63 @@ export default class Dashboard extends Component {
                         </div>
                     )}
 
+                    {this.state.groupedBySector.length > 0 && (
+                        <>
+                            <div className="chart-container-table">
+                                <h6>
+                                    Average LTP, High, Low and Turnover Grouped by Sector
+                                </h6>
+                                <table className="table table-success table-striped" style={{ width: "100%" }}>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Sector</th>
+                                            <th scope="col">Average LTP</th>
+                                            <th scope="col">Average High</th>
+                                            <th scope="col">Average Low</th>
+                                            <th scope="col">Average Turnover</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.state.groupedBySector.map((data, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <td>{data.label}</td>
+                                                    <td>
+                                                        {data.avgLtp !== null ? (
+                                                            <>
+                                                                <b>Rs.</b> {data.avgLtp.toFixed(2)}
+                                                            </>
+                                                        ) : 'N/A'}
+                                                    </td>
+                                                    <td>
+                                                        {data.avgHigh !== null ? (
+                                                            <>
+                                                                <b>Rs.</b> {data.avgHigh.toFixed(2)}
+                                                            </>
+                                                        ) : 'N/A'}
+                                                    </td>
+                                                    <td>
+                                                        {data.avgLow !== null ? (
+                                                            <>
+                                                                <b>Rs.</b> {data.avgLow.toFixed(2)}
+                                                            </>
+                                                        ) : 'N/A'}
+                                                    </td>
+                                                    <td>
+                                                        {data.avgTurnOver !== null ? (
+                                                            <>
+                                                                <b>Rs.</b> {data.avgTurnOver.toFixed(2)}
+                                                            </>
+                                                        ) : 'N/A'}
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
                 </div>
             </React.Fragment>
         )

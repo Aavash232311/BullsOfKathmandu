@@ -139,8 +139,8 @@ namespace Data_API.Server.Controller
         [EnableRateLimiting("RateLimitingPolicy")]
         public async Task<IActionResult> MarketCapData(string name)
         {
-            var marketCapRes = await _context.CompanyLists
-                .Where(s => s.Sector != null && s.Sector.ToLower().Contains(name.ToLower()) && s.MarketCapitalizationRs != null) // even though that is almost perfect name according to clinet side logic, until and unless someone brute forces that one right there.
+            var marketCapRes = await _context.CompanyLists 
+                .Where(s => s.Sector != null && s.MarketCapitalizationRs != null && s.Sector == name) // even though that is almost perfect name according to clinet side logic, until and unless someone brute forces that one right there.
                 .Select(s => new
                 {
                     as_of = s.AsOf,
@@ -154,8 +154,27 @@ namespace Data_API.Server.Controller
                 .ToListAsync();
             var cleaned = marketCapRes
                 .DistinctBy(x => x.as_of); // It's important to understand why this does not work in SQL level but I will do that after my finals are over.
-            
-            return Ok(cleaned);
+
+
+            // Lets also give LTP by sector in this API since we are searching from sector here.
+            // we want to group by date as well as sector.
+            var ltpBySector = await _context.CombinedPriceHistories
+                .Where(s => s.Sector != null && s.Sector == name)
+                .GroupBy(g => g.Sector)
+                .Select(o => new
+                {
+                    label = o.Key,
+                    avgLtp = o.Average(a => a.Ltp),
+                    avgHigh = o.Average(a => a.High),
+                    avgLow = o.Average(a => a.Low),
+                    avgTurnOver = o.Average(a => a.Turnover)
+                })
+               .ToListAsync(); // we want to plot the sector based LTP, high, and lows.
+            return Ok(new
+            {
+                marketCap = cleaned,
+                ltpBySector
+            });
         }
     }
 }

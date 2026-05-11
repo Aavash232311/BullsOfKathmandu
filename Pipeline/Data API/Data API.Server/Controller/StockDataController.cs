@@ -141,20 +141,16 @@ namespace Data_API.Server.Controller
         {
             var marketCapRes = await _context.CompanyLists 
                 .Where(s => s.Sector != null && s.MarketCapitalizationRs != null && s.Sector == name) // even though that is almost perfect name according to clinet side logic, until and unless someone brute forces that one right there.
-                .Select(s => new
+                .GroupBy(g => g.Sector)
+                .Select(o => new
                 {
-                    as_of = s.AsOf,
-                    market_cap = s.MarketCapitalizationRs,
-                    ltp = s.Ltp,
-                    paid_up = s.PaidUpRs, // I am not a finance person
-                    sector = s.Sector,
-                    listed_share = s.ListedShare
-                })
-                .OrderBy(a => a.as_of)
+                    market_cap = o.Average(m => m.MarketCapitalizationRs),
+                    ltp = o.Average(l => l.Ltp),
+                    paid_up = o.Average(p => p.PaidUpRs),
+                    sector = o.Key, // the thing that we grouped by
+                    listed_share = o.Average(l => l.ListedShare)
+                })               
                 .ToListAsync();
-            var cleaned = marketCapRes
-                .DistinctBy(x => x.as_of); // It's important to understand why this does not work in SQL level but I will do that after my finals are over.
-
 
             // Lets also give LTP by sector in this API since we are searching from sector here.
             // we want to group by date as well as sector.
@@ -172,7 +168,7 @@ namespace Data_API.Server.Controller
                .ToListAsync(); // we want to plot the sector based LTP, high, and lows.
             return Ok(new
             {
-                marketCap = cleaned,
+                marketCap = marketCapRes,
                 ltpBySector
             });
         }

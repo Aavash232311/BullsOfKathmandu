@@ -5,13 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
-
-/* This project is for demonstration of
- * ORM in modern day software engineering. 
- If I had time then I would surely add authentication here from OAuth. 
-
- */
-
 namespace Data_API.Server.Controller
 {
     [Route("[controller]")]
@@ -165,7 +158,7 @@ namespace Data_API.Server.Controller
                     avgLow = o.Average(a => a.Low),
                     avgTurnOver = o.Average(a => a.Turnover)
                 })
-               .ToListAsync(); // we want to plot the sector based LTP, high, and lows.
+               .ToListAsync(); 
             return Ok(new
             {
                 marketCap = marketCapRes,

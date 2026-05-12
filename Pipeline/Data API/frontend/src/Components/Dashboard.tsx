@@ -68,7 +68,6 @@ export interface SectorData {
 }
 
 export interface SectorMarketCapData {
-    as_of: string;
     market_cap: number;
     ltp: number;
     paid_up: number;
@@ -493,7 +492,6 @@ export default class Dashboard extends Component {
                                         <th scope="col">LTP</th>
                                         <th scope="col">Paid up</th>
                                         <th scope="col">Sector</th>
-                                        <th scope="col">As of</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -528,7 +526,6 @@ export default class Dashboard extends Component {
                                                         </>
                                                     ) : 'N/A'}
                                                 </td>
-                                                <td>{data.as_of}</td>
                                             </tr>
                                         )
                                     })}
